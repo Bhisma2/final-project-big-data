@@ -1,37 +1,40 @@
 from confluent_kafka import Producer
 import pandas as pd
 import json
-import random
 
+# Konfigurasi Kafka
 conf = {
-    'bootstrap.servers': 'localhost:29092',
+    'bootstrap.servers': 'localhost:9092',
     'client.id': 'samsung-stock-producer',
 }
 
 producer = Producer(**conf)
-print("Spinning up Kafka Producer...")
+print("Kafka Producer siap...")
 
-data = pd.read_csv("dataset/samsung_stock.csv")
+# Load dataset
+DATASET_PATH = "../dataset/samsung_stock.csv"
+
+try:
+    data = pd.read_csv(DATASET_PATH)
+except FileNotFoundError:
+    print(f"File {DATASET_PATH} tidak ditemukan. Pastikan dataset sudah tersedia.")
+    exit(1)
+
+# Preprocessing dataset
 data.columns = data.columns.str.strip()
-
 data.rename(columns={'Unnamed: 0': 'date'}, inplace=True)
-
-print("Kolom yang ditemukan:", data.columns)
-print("Beberapa data pertama:")
-print(data.head())
-
 data['date'] = pd.to_datetime(data['date'], errors='coerce')
 
 topic = "samsung-stock-data"
 
 def delivery_report(err, msg):
-    if err is not None:
-        print(f'Message delivery failed: {err}')
+    if err:
+        print(f"Pengiriman pesan gagal: {err}")
     else:
-        print(f'Message delivered to {msg.topic()} [{msg.partition()}]')
+        print(f"Pesan terkirim ke {msg.topic()} [partisi {msg.partition()}]")
 
 for index, row in data.iterrows():
-    if pd.notna(row['date']) and pd.notna(row['Adj Close']) and pd.notna(row['Close']):
+    if pd.notna(row['date']):
         message = {
             "date": row["date"].strftime('%Y-%m-%d'),
             "adj_close": row["Adj Close"],
@@ -41,16 +44,13 @@ for index, row in data.iterrows():
             "open": row["Open"],
             "volume": row["Volume"],
         }
-
-        key = str(row["date"].strftime('%Y%m%d'))
-
+        key = row["date"].strftime('%Y%m%d')
         try:
             producer.produce(topic, key=key, value=json.dumps(message), callback=delivery_report)
-            print(f"Message {index} sent to Kafka")
         except Exception as e:
-            print(f"Failed to send message {index}: {e}")
+            print(f"Gagal mengirim pesan: {e}")
     else:
-        print(f"Data pada indeks {index} tidak lengkap, melewati...")
+        print(f"Data pada indeks {index} tidak valid, melewati...")
 
 producer.flush()
-print("All messages sent.")
+print("Semua pesan telah dikirim.")
