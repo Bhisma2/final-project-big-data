@@ -33,7 +33,7 @@ if not minio_client.bucket_exists(bucket_name):
 # Process and store the message in Minio
 def store_in_minio(message):
     # Create a unique file name (using date or message key)
-    file_name = f"samsung-stock-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
+    file_name = f"samsung-stock-{message['date']}.json"
 
     # Save the message to a JSON file
     with open(file_name, 'w') as f:
@@ -56,17 +56,18 @@ def consume_messages():
     try:
         # Start consuming messages
         while True:
-            msg = consumer.poll(timeout=1.0)  # Timeout in seconds
-
-            if msg is None:  # No message available within the timeout
+            messages = consumer.consume(num_messages=10, timeout=1.0)  # Consume up to 10 messages at a time
+            if not messages:  # No messages available within the timeout
                 continue
-            if msg.error():  # Error while fetching the message
-                raise KafkaException(msg.error())
-            else:
-                # Deserialize the message
-                message = json.loads(msg.value().decode('utf-8'))
-                print(f"Message consumed: {message}")
-                store_in_minio(message)
+
+            for msg in messages:
+                if msg.error():  # Error while fetching the message
+                    raise KafkaException(msg.error())
+                else:
+                    # Deserialize the message
+                    message = json.loads(msg.value().decode('utf-8'))
+                    print(f"Message consumed: {message}")
+                    store_in_minio(message)
 
     except KeyboardInterrupt:
         print("Consuming stopped by user.")
