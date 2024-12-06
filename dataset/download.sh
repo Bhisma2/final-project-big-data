@@ -2,7 +2,7 @@
 
 FILE="./samsung-stock-data-2024.zip"
 CSV_FILE="./samsung-stock-data-2024.csv"
-DEST_DIR="./dataset"
+DEST_DIR="./"
 
 if [ ! -d "$DEST_DIR" ]; then
   mkdir -p "$DEST_DIR"
@@ -21,12 +21,10 @@ else
   echo "File sudah ada, melanjutkan ke ekstraksi."
 fi
 
-if [ ! -f "$DEST_DIR/samsung-stock-data-2024.csv" ]; then
+if [ ! -f "$DEST_DIR/samsung_stock.csv" ]; then
   unzip $FILE -d "$DEST_DIR" || { echo "Ekstraksi gagal"; exit 1; }
+  mv "$DEST_DIR/$CSV_FILE" "$DEST_DIR/samsung_stock.csv"
 fi
 
-mv "$DEST_DIR/samsung-stock-data-2024.csv" "$DEST_DIR/samsung_stock.csv"
-
 rm $FILE
-
 echo "Selesai! File telah disalin menjadi $DEST_DIR/samsung_stock.csv"

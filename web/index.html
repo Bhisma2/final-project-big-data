@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Price Prediction</h1>
+        <form id="predictForm">
+            <input type="number" id="day1" placeholder="Day 1 Value" required>
+            <input type="number" id="day2" placeholder="Day 2 Value" required>
+            <input type="number" id="day3" placeholder="Day 3 Value" required>
+            <input type="number" id="day4" placeholder="Day 4 Value" required>
+            <input type="number" id="day5" placeholder="Day 5 Value" required>
+            <button type="submit">Predict</button>
+        </form>
+        <div class="results" id="results"></div>
+        <div class="error" id="error"></div>
+    </div>
+    <script>
+        document.getElementById("predictForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            document.getElementById("results").innerHTML = "";
+            document.getElementById("error").innerHTML = "";
+
+            // Collect input values
+            const inputValues = [
+                parseFloat(document.getElementById("day1").value),
+                parseFloat(document.getElementById("day2").value),
+                parseFloat(document.getElementById("day3").value),
+                parseFloat(document.getElementById("day4").value),
+                parseFloat(document.getElementById("day5").value)
+            ];
+
+            try {
+                // Send data to server
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ last_values: inputValues })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById("error").innerText = errorData.error || "An error occurred!";
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById("results").innerHTML = `
+                    <h3>Predicted Prices:</h3>
+                    <ul>
+                        ${data.predicted_prices.map(price => `<li>${price.toFixed(2)}</li>`).join("")}
+                    </ul>
+                `;
+            } catch (err) {
+                document.getElementById("error").innerText = "An unexpected error occurred!";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
