@@ -1,115 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Prediction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-        }
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-        }
-        input[type="number"] {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .error {
-            color: red;
-        }
-    </style>
+    <title>Analisis Fluktuasi Kapitalisasi Pasar Samsung (2007-2024)</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Stock Price Prediction</h1>
-        <form id="predictForm">
-            <input type="number" id="day1" placeholder="Day 1 Value" required>
-            <input type="number" id="day2" placeholder="Day 2 Value" required>
-            <input type="number" id="day3" placeholder="Day 3 Value" required>
-            <input type="number" id="day4" placeholder="Day 4 Value" required>
-            <input type="number" id="day5" placeholder="Day 5 Value" required>
-            <button type="submit">Predict</button>
-        </form>
-        <div class="results" id="results"></div>
-        <div class="error" id="error"></div>
+
+    <header class="header">
+        <section class="flex">
+            <a href="#home" class="logo"><i class="fa-solid fa-chart-line"></i> Data Lakehouse</a>
+            <div class="btn">Kelompok 4</div>
+        </section>
+    </header>
+
+    <section id="home" class="home">
+        <div class="flex">
+            <div class="content">
+                <h3>Analisis Fluktuasi Kapitalisasi Pasar Samsung</h3>
+                <p>Menganalisis data saham Samsung dari tahun 2007 hingga 2024 untuk menghasilkan wawasan berbasis data
+                    yang akurat.</p>
+                <a href="#about" class="btn">Mulai Analisis</a>
+            </div>
+            <div class="image">
+                <img src="./image/saham.webp" alt="home image">
+            </div>
+        </div>
+    </section>
+
+    <div class="about" id="about">
+        <section class="flex">
+            <div class="content">
+                <h3>Manfaat yang Kami Tawarkan</h3>
+                <p>Platform kami memadukan data historis dan real-time untuk memberikan prediksi fluktuasi pasar yang
+                    akurat, membantu pengambilan keputusan investasi yang lebih baik.</p>
+                <p>Dilengkapi dengan sistem Data Lakehouse, kami menawarkan fleksibilitas dalam mengelola data
+                    terstruktur hingga tidak terstruktur.</p>
+                <a href="#prediction" class="btn">Pelajari Prediksi</a>
+            </div>
+
+            <div class="image">
+                <img src="./image/saham.webp" alt="stock image">
+            </div>
+        </section>
     </div>
-    <script>
-        document.getElementById("predictForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            document.getElementById("results").innerHTML = "";
-            document.getElementById("error").innerHTML = "";
 
-            // Collect input values
-            const inputValues = [
-                parseFloat(document.getElementById("day1").value),
-                parseFloat(document.getElementById("day2").value),
-                parseFloat(document.getElementById("day3").value),
-                parseFloat(document.getElementById("day4").value),
-                parseFloat(document.getElementById("day5").value)
-            ];
+    <section id="prediction" class="services">
+        <div class="box-container">
+            <div class="box">
+                <h3>Prediksi Fluktuasi Pasar</h3>
+                <p>Masukkan data harga saham 5 hari terakhir untuk mendapatkan prediksi harga di masa depan.</p>
+                <form id="predictForm" class="form">
+                    <input type="number" id="day1" class="input" placeholder="Nilai Hari 1" required>
+                    <input type="number" id="day2" class="input" placeholder="Nilai Hari 2" required>
+                    <input type="number" id="day3" class="input" placeholder="Nilai Hari 3" required>
+                    <input type="number" id="day4" class="input" placeholder="Nilai Hari 4" required>
+                    <input type="number" id="day5" class="input" placeholder="Nilai Hari 5" required>
+                    <button type="submit" class="btn">Prediksi</button>
+                </form>
+                <div class="results" id="results">
+                    <h3>Hasil Prediksi</h3>
+                    <canvas id="predictionChart"></canvas>
+                </div>
 
-            try {
-                // Send data to server
-                const response = await fetch("http://127.0.0.1:5000/predict", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ last_values: inputValues })
-                });
+                <div class="error" id="error"></div>
+            </div>
+        </div>
+    </section>
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    document.getElementById("error").innerText = errorData.error || "An error occurred!";
-                    return;
-                }
+    <footer class="footer">
+        <div class="credit">Dibuat oleh Kelompok 4 | ❤️ Data Lakehouse</div>
+    </footer>
 
-                const data = await response.json();
-                document.getElementById("results").innerHTML = `
-                    <h3>Predicted Prices:</h3>
-                    <ul>
-                        ${data.predicted_prices.map(price => `<li>${price.toFixed(2)}</li>`).join("")}
-                    </ul>
-                `;
-            } catch (err) {
-                document.getElementById("error").innerText = "An unexpected error occurred!";
-                console.error(err);
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
+
 </html>
